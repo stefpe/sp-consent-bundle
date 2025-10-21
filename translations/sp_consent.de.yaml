@@ -1,0 +1,12 @@
+cookie.category.necessary.name: 'Notwendige Cookies'
+cookie.category.necessary.description: 'Diese Cookies sind für das Funktionieren der Website erforderlich und können nicht deaktiviert werden.'
+
+cookie.category.analytics.name: 'Analyse Cookies'
+cookie.category.analytics.description: 'Diese Cookies helfen uns zu verstehen, wie Besucher mit der Website interagieren.'
+
+cookie.category.marketing.name: 'Marketing Cookies'
+cookie.category.marketing.description: 'Diese Cookies werden verwendet, um Ihnen relevante Werbung zu zeigen.'
+
+cookie.category.functional.name: 'Funktionale Cookies'
+cookie.category.functional.description: 'Diese Cookies ermöglichen erweiterte Funktionen und Personalisierung.'
+

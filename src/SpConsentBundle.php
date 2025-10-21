@@ -20,7 +20,12 @@ final class SpConsentBundle extends AbstractBundle
         // Set configuration parameters
         $container->parameters()
             ->set('sp_consent.categories', $config['categories'])
-            ->set('sp_consent.cookie_lifetime', $config['cookie_lifetime']);
+            ->set('sp_consent.cookie_lifetime', $config['cookie_lifetime'])
+            ->set('sp_consent.translation_domain', $config['translation_domain'])
+            ->set('sp_consent.use_translations', $config['use_translations'])
+            ->set('sp_consent.enable_logging', $config['enable_logging'])
+            ->set('sp_consent.log_level', $config['log_level'])
+            ->set('sp_consent.consent_version', $config['consent_version']);
 
         $container->import('../config/services.php');
     }

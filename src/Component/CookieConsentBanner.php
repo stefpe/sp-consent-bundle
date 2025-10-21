@@ -2,6 +2,7 @@
 
 namespace Stefpe\SpConsentBundle\Component;
 
+use Stefpe\SpConsentBundle\Enum\ConsentAction;
 use Stefpe\SpConsentBundle\Service\CookieConsentService;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -55,7 +56,8 @@ class CookieConsentBanner
     #[LiveAction]
     public function acceptAll(): void
     {
-        $cookie = $this->cookieConsentService->acceptAllCookies();
+        $request = $this->requestStack->getCurrentRequest();
+        $cookie = $this->cookieConsentService->acceptAllCookies($request);
         $this->showBanner = false;
         
         // Get all categories and set them to true
@@ -76,7 +78,8 @@ class CookieConsentBanner
     #[LiveAction]
     public function rejectOptional(): void
     {
-        $cookie = $this->cookieConsentService->rejectOptionalCookies();
+        $request = $this->requestStack->getCurrentRequest();
+        $cookie = $this->cookieConsentService->rejectOptionalCookies($request);
         $this->showBanner = false;
         
         // Get the preferences that were just set (only required = true)
@@ -116,7 +119,8 @@ class CookieConsentBanner
     #[LiveAction]
     public function savePreferences(): void
     {
-        $cookie = $this->cookieConsentService->saveConsentPreferences($this->preferences);
+        $request = $this->requestStack->getCurrentRequest();
+        $cookie = $this->cookieConsentService->saveConsentPreferences($this->preferences, $request, ConsentAction::CUSTOM);
         $this->showBanner = false;
         
         // Store cookie in session for the response listener to set it

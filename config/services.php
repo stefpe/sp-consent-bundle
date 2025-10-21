@@ -12,7 +12,15 @@ return static function (ContainerConfigurator $container): void {
             ->args([
                 '%sp_consent.categories%',
                 '%sp_consent.cookie_lifetime%',
+                service('translator'),
+                '%sp_consent.translation_domain%',
+                '%sp_consent.use_translations%',
+                service('logger')->nullOnInvalid(),
+                '%sp_consent.enable_logging%',
+                '%sp_consent.log_level%',
+                '%sp_consent.consent_version%',
             ])
+            ->tag('monolog.logger', ['channel' => 'sp_consent'])
             ->public();
     
     // Alias for autowiring

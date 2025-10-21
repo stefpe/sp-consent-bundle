@@ -9,6 +9,26 @@ return static function (DefinitionConfigurator $definition): void {
                 ->defaultValue(365 * 24 * 60 * 60) // 1 year in seconds
                 ->info('Cookie lifetime in seconds')
             ->end()
+            ->scalarNode('translation_domain')
+                ->defaultValue('sp_consent')
+                ->info('Translation domain for category names and descriptions')
+            ->end()
+            ->booleanNode('use_translations')
+                ->defaultFalse()
+                ->info('Whether to translate category names and descriptions')
+            ->end()
+            ->booleanNode('enable_logging')
+                ->defaultTrue()
+                ->info('Whether to log consent actions for GDPR compliance')
+            ->end()
+            ->scalarNode('log_level')
+                ->defaultValue('info')
+                ->info('Log level for consent actions (debug, info, notice, warning, error)')
+            ->end()
+            ->scalarNode('consent_version')
+                ->defaultValue('1.0')
+                ->info('Version of the consent policy (for tracking policy changes)')
+            ->end()
             ->arrayNode('categories')
                 ->useAttributeAsKey('key')
                 ->arrayPrototype()
@@ -28,23 +48,23 @@ return static function (DefinitionConfigurator $definition): void {
                 ->end()
                 ->defaultValue([
                     'necessary' => [
-                        'name' => 'Notwendige Cookies',
-                        'description' => 'Diese Cookies sind für das Funktionieren der Website erforderlich und können nicht deaktiviert werden.',
+                        'name' => 'cookie.category.necessary.name',
+                        'description' => 'cookie.category.necessary.description',
                         'required' => true,
                     ],
                     'analytics' => [
-                        'name' => 'Analyse Cookies',
-                        'description' => 'Diese Cookies helfen uns zu verstehen, wie Besucher mit der Website interagieren.',
+                        'name' => 'cookie.category.analytics.name',
+                        'description' => 'cookie.category.analytics.description',
                         'required' => false,
                     ],
                     'marketing' => [
-                        'name' => 'Marketing Cookies',
-                        'description' => 'Diese Cookies werden verwendet, um Ihnen relevante Werbung zu zeigen.',
+                        'name' => 'cookie.category.marketing.name',
+                        'description' => 'cookie.category.marketing.description',
                         'required' => false,
                     ],
                     'functional' => [
-                        'name' => 'Funktionale Cookies',
-                        'description' => 'Diese Cookies ermöglichen erweiterte Funktionen und Personalisierung.',
+                        'name' => 'cookie.category.functional.name',
+                        'description' => 'cookie.category.functional.description',
                         'required' => false,
                     ],
                 ])
