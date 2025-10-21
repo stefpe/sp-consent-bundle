@@ -6,6 +6,7 @@ use Psr\Log\LoggerInterface;
 use Stefpe\SpConsentBundle\Enum\ConsentAction;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CookieConsentService
@@ -156,7 +157,7 @@ class CookieConsentService
         // Add request context if available (GDPR proof of consent requirements)
         if ($request) {
             $ipAddress = $request->getClientIp();
-            $context['ip_address'] = $this->anonymizeIpAddress($ipAddress);
+            $context['ip_address'] = $ipAddress ? IpUtils::anonymize($ipAddress) : null;
             $context['user_agent'] = $request->headers->get('User-Agent');
             $context['referrer'] = $request->headers->get('Referer');
             $context['request_uri'] = $request->getRequestUri();
@@ -195,42 +196,6 @@ class CookieConsentService
             'error' => $this->logger->error($message, $context),
             default => $this->logger->info($message, $context),
         };
-    }
-
-    /**
-     * Anonymizes an IP address for GDPR compliance and enhanced privacy.
-     * 
-     * IP addresses are always anonymized to protect user privacy while still
-     * allowing for geographic tracking and fraud prevention.
-     * 
-     * IPv4: Removes the last octet (e.g., 192.168.1.100 → 192.168.1.0)
-     * IPv6: Removes the last 80 bits (e.g., 2001:0db8::1 → 2001:0db8::)
-     * 
-     * This provides a balance between user identification and privacy.
-     */
-    private function anonymizeIpAddress(?string $ipAddress): ?string
-    {
-        if ($ipAddress === null) {
-            return null;
-        }
-
-        // Check if it's an IPv6 address
-        if (str_contains($ipAddress, ':')) {
-            // IPv6: Keep first 48 bits (3 groups), remove last 80 bits
-            $parts = explode(':', $ipAddress);
-            // Keep first 3 groups (48 bits)
-            $anonymized = array_slice($parts, 0, 3);
-            return implode(':', $anonymized) . '::';
-        }
-
-        // IPv4: Remove last octet
-        $parts = explode('.', $ipAddress);
-        if (count($parts) === 4) {
-            $parts[3] = '0';
-            return implode('.', $parts);
-        }
-
-        return $ipAddress;
     }
 }
 

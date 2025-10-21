@@ -616,7 +616,7 @@ The bundle includes built-in consent logging to help you comply with GDPR requir
 When a user gives, updates, or withdraws consent, the bundle automatically logs:
 
 1. **Timestamp** - When the consent was given (ISO 8601 format)
-2. **IP Address** - User's IP address for identification (automatically anonymized for privacy)
+2. **IP Address** - User's IP address for identification (automatically anonymized using Symfony's `IpUtils::anonymize()`)
 3. **User Agent** - Browser and device information
 4. **Consent Preferences** - Which cookie categories were accepted/rejected
 5. **Consent Version** - Version of your consent policy (configurable)
@@ -710,7 +710,7 @@ monolog:
 2. **Log Rotation**: Use Monolog's rotating file handler to manage log file sizes
 3. **Access Control**: Restrict access to consent logs to authorized personnel only
 4. **Backup**: Regularly backup consent logs to prevent data loss
-5. **IP Anonymization**: IP addresses are automatically anonymized in all consent logs for enhanced privacy (IPv4: last octet removed, IPv6: last 80 bits removed)
+5. **IP Anonymization**: IP addresses are automatically anonymized in all consent logs using Symfony's `IpUtils::anonymize()` for enhanced privacy (IPv4: last octet removed, IPv6: last 80 bits removed)
 
 #### Disabling Logging
 
