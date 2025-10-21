@@ -150,7 +150,6 @@ class CookieConsentService
         $context = [
             'action' => $action->value,
             'preferences' => $preferences,
-            'consent_version' => $this->consentVersion,
             'timestamp' => date('Y-m-d H:i:s'),
         ];
 
@@ -185,7 +184,7 @@ class CookieConsentService
             $action->value,
             count($acceptedCategories),
             count($rejectedCategories),
-            $this->consentVersion
+            $preferences['version'] ?? 'unknown'
         );
 
         // Log at configured level

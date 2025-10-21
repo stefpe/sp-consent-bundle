@@ -616,7 +616,7 @@ The bundle includes built-in consent logging to help you comply with GDPR requir
 When a user gives, updates, or withdraws consent, the bundle automatically logs:
 
 1. **Timestamp** - When the consent was given (ISO 8601 format)
-2. **IP Address** - User's IP address for identification
+2. **IP Address** - User's IP address for identification (automatically anonymized for privacy)
 3. **User Agent** - Browser and device information
 4. **Consent Preferences** - Which cookie categories were accepted/rejected
 5. **Consent Version** - Version of your consent policy (configurable)
@@ -639,9 +639,8 @@ When a user gives, updates, or withdraws consent, the bundle automatically logs:
         "timestamp": 1729516335,
         "version": "1.0"
     },
-    "consent_version": "1.0",
     "timestamp": "2025-10-21 14:32:15",
-    "ip_address": "192.168.1.1",
+    "ip_address": "192.168.1.0",  // Anonymized (last octet removed)
     "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)...",
     "referrer": "https://example.com/privacy-policy",
     "request_uri": "/",
@@ -711,15 +710,7 @@ monolog:
 2. **Log Rotation**: Use Monolog's rotating file handler to manage log file sizes
 3. **Access Control**: Restrict access to consent logs to authorized personnel only
 4. **Backup**: Regularly backup consent logs to prevent data loss
-5. **IP Anonymization**: Consider anonymizing IP addresses for additional privacy:
-
-```yaml
-# config/packages/monolog.yaml
-services:
-    App\Monolog\AnonymizeIpProcessor:
-        tags:
-            - { name: monolog.processor, channel: sp_consent }
-```
+5. **IP Anonymization**: IP addresses are automatically anonymized in all consent logs for enhanced privacy (IPv4: last octet removed, IPv6: last 80 bits removed)
 
 #### Disabling Logging
 
@@ -740,8 +731,8 @@ Access logs via:
 # View recent consent logs
 tail -f var/log/consent_dev.log
 
-# Search for specific user consents by IP
-grep "192.168.1.1" var/log/consent_dev.log
+# Search for specific user consents by anonymized IP
+grep "192.168.1.0" var/log/consent_dev.log  # Note: IPs are anonymized
 
 # Filter by action type
 grep "accept_all" var/log/consent_dev.log
