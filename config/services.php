@@ -7,7 +7,15 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
 return static function (ContainerConfigurator $container): void {
-    $container->services()
+    $services = $container->services();
+    
+    // Enable autowire and autoconfigure for this bundle's services
+    $services
+        ->defaults()
+            ->autowire()
+            ->autoconfigure();
+    
+    $services
         ->set('sp_consent.cookie_consent_service', CookieConsentService::class)
             ->args([
                 '%sp_consent.categories%',
@@ -24,25 +32,17 @@ return static function (ContainerConfigurator $container): void {
             ->public();
     
     // Alias for autowiring
-    $container->services()
+    $services
         ->alias(CookieConsentService::class, 'sp_consent.cookie_consent_service')
         ->public();
     
-    // Live Component
-    $container->services()
-        ->set('sp_consent.cookie_consent_banner', CookieConsentBanner::class)
-            ->args([
-                service('sp_consent.cookie_consent_service'),
-                service('request_stack'),
-            ])
-            ->tag('controller.service_arguments')
-            ->tag('twig.component', ['key' => 'CookieConsentBanner']);
+    // Auto-register Components, EventListeners, and Twig Extensions via autoconfigure
+    $services
+        ->load('Stefpe\\SpConsentBundle\\Component\\', __DIR__ . '/../src/Component/');
     
-    // Response Listener
-    $container->services()
-        ->set('sp_consent.response_listener', CookieConsentResponseListener::class)
-            ->tag('kernel.event_listener', [
-                'event' => 'kernel.response',
-                'method' => 'onKernelResponse'
-            ]);
+    $services
+        ->load('Stefpe\\SpConsentBundle\\EventListener\\', __DIR__ . '/../src/EventListener/');
+    
+    $services
+        ->load('Stefpe\\SpConsentBundle\\Twig\\', __DIR__ . '/../src/Twig/');
 };

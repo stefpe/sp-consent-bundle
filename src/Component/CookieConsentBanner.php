@@ -11,7 +11,10 @@ use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
-#[AsLiveComponent('CookieConsentBanner')]
+#[AsLiveComponent(
+    name: 'CookieConsentBanner',
+    template: '@SpConsentBundle/components/CookieConsentBanner.html.twig'
+)]
 class CookieConsentBanner
 {
     use DefaultActionTrait;

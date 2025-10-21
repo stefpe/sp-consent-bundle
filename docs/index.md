@@ -11,8 +11,9 @@ A Symfony bundle that provides a GDPR-compliant cookie and consent banner compon
 4. [Configuration Reference](#configuration-reference)
 5. [GDPR Compliance and Consent Logging](#gdpr-compliance-and-consent-logging)
 6. [Service Reference](#service-reference)
-7. [Advanced Usage](#advanced-usage)
-8. [Cookie Format](#cookie-format)
+7. [Twig Functions](#twig-functions)
+8. [Advanced Usage](#advanced-usage)
+9. [Cookie Format](#cookie-format)
 
 ## Installation
 
@@ -853,11 +854,232 @@ public function consentForm(): Response
 {% endfor %}
 ```
 
+## Twig Functions
+
+The bundle provides convenient Twig functions to access consent information directly in your templates without needing to pass variables from controllers.
+
+### Available Functions
+
+#### `consent_preferences()`
+
+Returns the user's current consent preferences as an associative array.
+
+```twig
+{% set consent = consent_preferences() %}
+
+{# Check if analytics is enabled #}
+{% if consent.analytics %}
+    <script src="analytics.js"></script>
+{% endif %}
+
+{# Display all preferences #}
+<ul>
+    {% for category, value in consent %}
+        {% if category != 'timestamp' %}
+            <li>{{ category }}: {{ value ? 'Enabled' : 'Disabled' }}</li>
+        {% endif %}
+    {% endfor %}
+</ul>
+
+{# Access specific categories #}
+<p>Analytics: {{ consent.analytics ? 'Yes' : 'No' }}</p>
+<p>Marketing: {{ consent.marketing ? 'Yes' : 'No' }}</p>
+```
+
+#### `has_consent()`
+
+Checks if the user has given any consent (i.e., made a choice).
+
+```twig
+{% if has_consent() %}
+    <p>Thank you for your cookie preferences!</p>
+{% else %}
+    <p>Please review our cookie policy.</p>
+{% endif %}
+
+{# Conditionally load scripts #}
+{% if has_consent() %}
+    {% set prefs = consent_preferences() %}
+    {% if prefs.analytics %}
+        <script src="analytics.js"></script>
+    {% endif %}
+{% endif %}
+```
+
+#### `has_consent_for(category)`
+
+Checks if the user has given consent for a specific category. This is the most convenient way to conditionally load scripts.
+
+```twig
+{# Load analytics only if user consented #}
+{% if has_consent_for('analytics') %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
+{% endif %}
+
+{# Load marketing pixels #}
+{% if has_consent_for('marketing') %}
+    <script>
+        // Facebook Pixel, Google Ads, etc.
+    </script>
+{% endif %}
+
+{# Load functional features #}
+{% if has_consent_for('functional') %}
+    <script src="chat-widget.js"></script>
+{% endif %}
+```
+
+### Complete Example
+
+Here's a complete example showing how to use the Twig functions:
+
+```twig
+{# templates/base.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}My Website{% endblock %}</title>
+    
+    {# Always load essential scripts (no consent needed) #}
+    <script src="essential.js"></script>
+    
+    {# Conditionally load analytics #}
+    {% if has_consent_for('analytics') %}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-XXXXXXXXXX');
+        </script>
+    {% endif %}
+    
+    {# Conditionally load marketing scripts #}
+    {% if has_consent_for('marketing') %}
+        <!-- Meta Pixel Code -->
+        <script>
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', 'YOUR_PIXEL_ID');
+            fbq('track', 'PageView');
+        </script>
+    {% endif %}
+</head>
+<body>
+    {% block body %}{% endblock %}
+    
+    {# Display consent status in footer #}
+    <footer>
+        {% if has_consent() %}
+            {% set consent = consent_preferences() %}
+            <p>
+                Your cookie preferences: 
+                Analytics: {{ consent.analytics ? '✓' : '✗' }},
+                Marketing: {{ consent.marketing ? '✓' : '✗' }}
+                <a href="#" onclick="document.querySelector('[data-controller=live]').dispatchEvent(new Event('live#action', {detail: {action: 'reopenSettings'}}))">Change</a>
+            </p>
+        {% else %}
+            <p>You haven't set your cookie preferences yet.</p>
+        {% endif %}
+    </footer>
+    
+    {# Cookie Consent Banner #}
+    {{ component('CookieConsentBanner') }}
+</body>
+</html>
+```
+
+### Using with Google Consent Mode v2
+
+Combine the Twig functions with Google Consent Mode for optimal privacy compliance:
+
+```twig
+<script>
+    // Initialize consent as denied
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    
+    gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'analytics_storage': 'denied'
+    });
+    
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+    
+    // Apply consent if already given
+    {% if has_consent() %}
+        gtag('consent', 'update', {
+            'analytics_storage': {{ has_consent_for('analytics') ? "'granted'" : "'denied'" }},
+            'ad_storage': {{ has_consent_for('marketing') ? "'granted'" : "'denied'" }},
+            'ad_user_data': {{ has_consent_for('marketing') ? "'granted'" : "'denied'" }},
+            'ad_personalization': {{ has_consent_for('marketing') ? "'granted'" : "'denied'" }}
+        });
+    {% endif %}
+    
+    // Update consent when user makes a choice
+    document.addEventListener('cookieConsent:changed', function(event) {
+        const prefs = event.detail.preferences;
+        gtag('consent', 'update', {
+            'analytics_storage': prefs.analytics ? 'granted' : 'denied',
+            'ad_storage': prefs.marketing ? 'granted' : 'denied',
+            'ad_user_data': prefs.marketing ? 'granted' : 'denied',
+            'ad_personalization': prefs.marketing ? 'granted' : 'denied'
+        });
+    });
+</script>
+```
+
+### Benefits of Using Twig Functions
+
+1. **Cleaner Templates** - No need to pass consent data from every controller
+2. **Less Code** - Direct access to consent information
+3. **Type Safe** - Functions return properly typed data
+4. **Consistent** - Same API across all templates
+5. **Convenient** - Easy to check specific categories with `has_consent_for()`
+
+### Migration from Cookie Access
+
+If you were previously accessing the cookie directly, you can easily migrate:
+
+**Before:**
+```twig
+{% if app.request.cookies.has('cookie_consent_preferences') %}
+    {% set consent = app.request.cookies.get('cookie_consent_preferences')|json_decode %}
+    {% if consent.analytics %}
+        {# Load analytics #}
+    {% endif %}
+{% endif %}
+```
+
+**After:**
+```twig
+{% if has_consent_for('analytics') %}
+    {# Load analytics #}
+{% endif %}
+```
+
+Much cleaner and more readable! 🎉
+
 ## Advanced Usage
 
 ### Checking Consent in Templates
 
-You can pass the consent status to your templates:
+You can also pass the consent status to your templates from controllers if needed:
 
 ```php
 public function index(Request $request): Response

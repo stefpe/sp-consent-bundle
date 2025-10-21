@@ -9,7 +9,6 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 final class SpConsentBundle extends AbstractBundle
 {
-
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->import('../config/definition.php');
