@@ -6,14 +6,15 @@ A Symfony bundle that provides a GDPR-compliant cookie and consent banner compon
 ## Table of Contents
 
 1. [Installation](#installation)
-2. [Basic Usage](#basic-usage)
-3. [Using the Live Component](#using-the-live-component)
-4. [Configuration Reference](#configuration-reference)
-5. [GDPR Compliance and Consent Logging](#gdpr-compliance-and-consent-logging)
-6. [Service Reference](#service-reference)
-7. [Twig Functions](#twig-functions)
-8. [Advanced Usage](#advanced-usage)
-9. [Cookie Format](#cookie-format)
+2. [Styling](#styling)
+3. [Basic Usage](#basic-usage)
+4. [Using the Live Component](#using-the-live-component)
+5. [Configuration Reference](#configuration-reference)
+6. [GDPR Compliance and Consent Logging](#gdpr-compliance-and-consent-logging)
+7. [Service Reference](#service-reference)
+8. [Twig Functions](#twig-functions)
+9. [Advanced Usage](#advanced-usage)
+10. [Cookie Format](#cookie-format)
 
 ## Installation
 
@@ -37,6 +38,17 @@ return [
 ];
 ```
 
+The bundle automatically registers:
+- All necessary services
+- Twig template paths (`@SpConsentBundle` namespace)
+- Event listeners
+- Twig components (CookieConsentBanner, CookieSettingsButton)
+- Twig functions (consent_preferences(), has_consent(), has_consent_for())
+
+**Styling:** The components use **Tailwind CSS classes by default** for a modern, clean look. If you don't use Tailwind CSS in your project, you can easily override the styling with custom classes or inline styles using nested attributes (see [Advanced Usage](#advanced-usage)).
+
+No additional configuration is required for basic usage.
+
 ### Step 3: Configuration (Optional)
 
 The bundle comes with sensible defaults, but you can customize it by creating a configuration file:
@@ -53,6 +65,345 @@ sp_consent:
 ```
 
 See the [Configuration Reference](#configuration-reference) for all available options.
+
+## Styling
+
+The components come with **minimal default classes** (e.g., `cookie-consent-banner`, `cookie-consent-simple`) that you style however you want. This gives you complete flexibility to use Tailwind CSS, custom CSS, Bootstrap, or any other styling approach.
+
+### Default Classes
+
+The bundle provides these default class names for identification and styling:
+
+- `.cookie-consent-banner` - Main banner wrapper
+- `.cookie-consent-simple` - Simple banner view
+- `.cookie-consent-advanced` - Advanced settings view
+- `.cookie-settings-button` - Settings button
+
+**All elements are unstyled by default.** You need to provide styling through one of the methods below.
+
+### Option 1: Using with Tailwind CSS (Recommended)
+
+The easiest way to style the components is with the [SymfonyCasts Tailwind Bundle](https://github.com/SymfonyCasts/tailwind-bundle), which provides delightful Tailwind support for Symfony with AssetMapper (no Node.js required!).
+
+#### Install Tailwind Bundle
+
+```bash
+composer require symfonycasts/tailwind-bundle
+```
+
+The bundle will automatically:
+- Download the standalone Tailwind CSS binary
+- Create a `tailwind.config.js` file
+- Set up the build process
+- Watch for changes in development
+
+#### Build Tailwind CSS
+
+```bash
+# Development (watch mode)
+php bin/console tailwind:build --watch
+
+# Production
+php bin/console tailwind:build --minify
+```
+
+#### Apply Tailwind Classes to Components
+
+Pass Tailwind classes via nested attributes:
+
+```twig
+{{ component('CookieConsentBanner', {
+    'banner:class': 'fixed bottom-0 left-0 right-0 bg-white shadow-lg p-5 z-[9999]',
+    'simple_banner:container:class': 'max-w-screen-xl mx-auto flex items-center gap-5 flex-wrap',
+    'simple_banner:content:class': 'flex-1 min-w-[300px]',
+    'title:class': 'mb-2.5 text-lg font-semibold',
+    'message:class': 'text-gray-600 text-sm leading-relaxed',
+    'simple_banner:buttons_container:class': 'flex gap-2.5 flex-wrap',
+    'button:accept_all:class': 'px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors',
+    'button:reject_optional:class': 'px-6 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors',
+    'button:customize:class': 'px-6 py-3 bg-transparent text-blue-600 border-2 border-blue-600 rounded-md hover:bg-blue-600 hover:text-white transition-all'
+}) }}
+```
+
+**Advanced Settings with Tailwind:**
+
+```twig
+{{ component('CookieConsentBanner', {
+    'banner:class': 'fixed bottom-0 left-0 right-0 bg-white shadow-lg p-5 z-[9999]',
+    'advanced_settings:class': 'max-w-3xl mx-auto',
+    'advanced_header:class': 'flex justify-between items-center mb-5',
+    'advanced_title:class': 'text-xl font-semibold',
+    'advanced_close_button:class': 'text-2xl text-gray-600 hover:text-gray-900 cursor-pointer',
+    'categories_list:class': 'max-h-96 overflow-y-auto mb-5',
+    'category_item:class': 'border border-gray-300 rounded-lg p-4 mb-3 bg-gray-50',
+    'category_item:content:class': 'flex justify-between items-start gap-4',
+    'category_header:class': 'text-base font-semibold mb-2',
+    'category_description:class': 'text-sm text-gray-600',
+    'advanced_footer:class': 'flex gap-2.5 justify-end border-t border-gray-300 pt-4',
+    'button:save_preferences:class': 'px-8 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700',
+    'button:accept_all_advanced:class': 'px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700'
+}) }}
+```
+
+**Cookie Settings Button with Tailwind:**
+
+```twig
+{{ component('CookieSettingsButton', {
+    label: 'Cookie Settings',
+    class: 'px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+}) }}
+```
+
+### Option 2: Using Custom CSS
+
+If you prefer traditional CSS or use a different framework (Bootstrap, Bulma, etc.), you can override the default classes.
+
+#### Create Your Stylesheet
+
+Create `assets/styles/cookie-consent.css`:
+
+```css
+/* Base banner styles */
+.cookie-consent-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 24px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Container */
+.cookie-consent-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+/* Content area */
+.cookie-consent-content {
+    flex: 1;
+    min-width: 300px;
+}
+
+.cookie-consent-title {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+}
+
+.cookie-consent-message {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Buttons container */
+.cookie-consent-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Button base styles */
+.cookie-btn {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: none;
+}
+
+/* Accept button */
+.cookie-btn-accept {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.cookie-btn-accept:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Reject button */
+.cookie-btn-reject {
+    background: #6b7280;
+    color: white;
+}
+
+.cookie-btn-reject:hover {
+    background: #4b5563;
+    transform: translateY(-2px);
+}
+
+/* Customize button */
+.cookie-btn-customize {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+}
+
+.cookie-btn-customize:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Advanced settings */
+.cookie-consent-advanced {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.cookie-category-item {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cookie-category-header {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+}
+
+.cookie-category-description {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .cookie-consent-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .cookie-consent-buttons {
+        flex-direction: column;
+    }
+    
+    .cookie-btn {
+        width: 100%;
+    }
+}
+```
+
+#### Import Your Stylesheet
+
+In your `assets/app.js` or main CSS file:
+
+```javascript
+import './styles/cookie-consent.css';
+```
+
+#### Apply Custom Classes to the Component
+
+```twig
+{{ component('CookieConsentBanner', {
+    'banner:class': 'cookie-consent-banner',
+    'simple_banner:container:class': 'cookie-consent-container',
+    'simple_banner:content:class': 'cookie-consent-content',
+    'title:class': 'cookie-consent-title',
+    'message:class': 'cookie-consent-message',
+    'simple_banner:buttons_container:class': 'cookie-consent-buttons',
+    'button:accept_all:class': 'cookie-btn cookie-btn-accept',
+    'button:reject_optional:class': 'cookie-btn cookie-btn-reject',
+    'button:customize:class': 'cookie-btn cookie-btn-customize'
+}) }}
+```
+
+### Option 3: Using Inline Styles
+
+For simple use cases or quick prototyping, you can use inline styles:
+
+```twig
+{{ component('CookieConsentBanner', {
+    'banner:style': 'position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(to right, #6366f1, #8b5cf6); padding: 24px; z-index: 9999;',
+    'title:style': 'color: white; font-size: 20px; font-weight: bold; margin-bottom: 12px;',
+    'message:style': 'color: rgba(255,255,255,0.9); font-size: 15px;',
+    'button:accept_all:style': 'padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;'
+}) }}
+```
+
+### Available Customization Points
+
+All these elements can be customized using nested attributes with `:class` or `:style` suffixes:
+
+**Simple Banner View:**
+- `banner` - Main wrapper
+- `simple_banner` - Simple view container
+- `simple_banner:container` - Content container
+- `simple_banner:content` - Text content area
+- `simple_banner:buttons_container` - Buttons wrapper
+- `title` - Banner title
+- `message` - Banner message
+- `button:accept_all` - Accept all button
+- `button:reject_optional` - Reject optional button
+- `button:customize` - Customize button
+
+**Advanced Settings View:**
+- `advanced_settings` - Advanced view container
+- `advanced_settings:container` - Advanced content wrapper
+- `advanced_header` - Advanced header
+- `advanced_title` - Advanced title
+- `advanced_close_button` - Close button
+- `categories_list` - Categories list container
+- `category_item` - Individual category item
+- `category_item:content` - Category content wrapper
+- `category_item:info` - Category info section
+- `category_header` - Category title
+- `category_description` - Category description
+- `category_toggle:label` - Toggle switch label
+- `advanced_footer` - Advanced footer
+- `button:save_preferences` - Save preferences button
+- `button:accept_all_advanced` - Accept all button (advanced)
+
+### Using Block Overrides
+
+For more complex customization, you can override entire template blocks:
+
+```twig
+{% component 'CookieConsentBanner' %}
+    {% block simple_banner_title %}
+        <h3 class="custom-title">
+            🍪 We Value Your Privacy
+        </h3>
+    {% endblock %}
+    
+    {% block simple_banner_message %}
+        <p class="custom-message">
+            We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.
+            <a href="{{ path('privacy') }}" class="text-white underline">Learn more</a>
+        </p>
+    {% endblock %}
+    
+    {% block button_accept_all %}
+        <button data-action="live#action"
+                data-live-action-param="acceptAll"
+                class="custom-accept-button">
+            I Accept 🎉
+        </button>
+    {% endblock %}
+{% endcomponent %}
+```
 
 ## Basic Usage
 
@@ -305,6 +656,122 @@ templates/components/CookieConsentBanner.html.twig
 ```
 
 And extend or completely replace the bundle's template.
+
+### Cookie Settings Button Component
+
+The bundle also provides a separate `CookieSettingsButton` component that you can use anywhere in your application to allow users to reopen the cookie settings. This is useful for adding cookie settings links in footers, navigation menus, or privacy pages.
+
+#### Basic Usage
+
+```twig
+{# In your footer, navigation, or anywhere else #}
+{{ component('CookieSettingsButton') }}
+```
+
+This will render a button with the default label "Cookie-Einstellungen" that triggers the cookie settings dialog when clicked.
+
+#### Customization
+
+You can customize the button label and styling:
+
+```twig
+{# Custom label #}
+{{ component('CookieSettingsButton', {
+    label: 'Manage Cookies'
+}) }}
+
+{# With custom CSS classes #}
+{{ component('CookieSettingsButton', {
+    label: 'Cookie Preferences',
+    class: 'btn btn-link text-muted'
+}) }}
+
+{# In a footer menu #}
+<footer>
+    <nav>
+        <a href="/privacy">Privacy Policy</a>
+        {{ component('CookieSettingsButton', {
+            label: 'Cookie Settings',
+            class: 'footer-link'
+        }) }}
+        <a href="/imprint">Imprint</a>
+    </nav>
+</footer>
+```
+
+#### Using Attributes
+
+The component supports the standard Twig Component attributes API:
+
+```twig
+{# Add custom attributes #}
+{% component 'CookieSettingsButton' with {
+    label: 'Cookies',
+    class: 'nav-link'
+} %}
+    {% block attributes %}
+        id="cookie-settings-btn"
+        data-tracking="footer-cookie-link"
+        aria-label="Open cookie settings"
+    {% endblock %}
+{% endcomponent %}
+```
+
+#### How It Works
+
+The button uses JavaScript to trigger the Live Component action:
+
+```javascript
+document.querySelector('[data-live-name-value=CookieConsentBanner]').__component.action('reopenSettings')
+```
+
+This means:
+- ✅ No page reload needed
+- ✅ Works from anywhere on the page
+- ✅ Opens the advanced settings view directly
+- ✅ Fully accessible
+
+#### Example: Footer with Cookie Settings
+
+```twig
+{# templates/base.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- ... -->
+</head>
+<body>
+    {% block body %}{% endblock %}
+    
+    <footer style="background: #f8f9fa; padding: 20px; margin-top: 50px;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <p>&copy; 2025 Your Company. All rights reserved.</p>
+            </div>
+            <nav style="display: flex; gap: 20px;">
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
+                {{ component('CookieSettingsButton', {
+                    label: 'Cookie Settings',
+                    class: 'text-primary hover:text-primary-dark transition-colors cursor-pointer'
+                }) }}
+                <a href="/contact">Contact</a>
+            </nav>
+        </div>
+    </footer>
+    
+    {# Cookie Consent Banner #}
+    {{ component('CookieConsentBanner') }}
+</body>
+</html>
+```
+
+**Benefits:**
+- ✅ **Reusable** - Use the button anywhere without duplicating code
+- ✅ **Consistent** - Same behavior everywhere
+- ✅ **Accessible** - Proper button semantics
+- ✅ **Customizable** - Easy to style for your design
+- ✅ **GDPR Friendly** - Easy access to cookie settings as required by law
 
 #### JavaScript Events
 
@@ -1076,6 +1543,117 @@ If you were previously accessing the cookie directly, you can easily migrate:
 Much cleaner and more readable! 🎉
 
 ## Advanced Usage
+
+### Customizing Component Styling
+
+The CookieConsentBanner and CookieSettingsButton components use **Tailwind CSS classes by default**. This provides a clean, modern look out of the box while remaining fully customizable.
+
+#### Using with Tailwind CSS
+
+If your project uses Tailwind CSS, the components will work perfectly without any additional configuration. The default classes include:
+
+- Responsive layout with flexbox
+- Modern button styles with hover states
+- Proper spacing and typography
+- Clean color scheme using Tailwind's default palette
+
+#### Customizing with Tailwind Classes
+
+You can override any element's classes using nested attributes:
+
+```twig
+{{ component('CookieConsentBanner', {
+    'banner:class': 'fixed bottom-0 inset-x-0 bg-gradient-to-r from-purple-600 to-blue-600 p-8 z-50',
+    'button:accept_all:class': 'px-8 py-4 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold shadow-lg',
+    'title:class': 'text-2xl font-bold text-white mb-3',
+    'message:class': 'text-white text-base'
+}) }}
+```
+
+#### Using Without Tailwind CSS
+
+If you don't use Tailwind CSS, you can override the default classes with your own CSS classes or use inline styles:
+
+**Option 1: Custom CSS Classes**
+
+```twig
+{{ component('CookieConsentBanner', {
+    'banner:class': 'my-custom-banner',
+    'button:accept_all:class': 'btn btn-primary',
+    'button:reject_optional:class': 'btn btn-secondary'
+}) }}
+```
+
+Then define your styles in CSS:
+
+```css
+.my-custom-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 9999;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: #0d6efd;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0b5ed7;
+}
+```
+
+**Option 2: Inline Styles**
+
+```twig
+{{ component('CookieConsentBanner', {
+    'banner:style': 'position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 20px; z-index: 9999;',
+    'button:accept_all:style': 'padding: 12px 24px; background: #0d6efd; color: white; border: none; border-radius: 6px; cursor: pointer;'
+}) }}
+```
+
+#### Available Nested Attribute Keys
+
+You can customize these elements using nested attributes with either `:class` or `:style` suffixes:
+
+- `banner` - The main banner wrapper
+- `title` - The banner title
+- `message` - The banner message text
+- `button:accept_all` - "Accept All" button
+- `button:reject_optional` - "Only necessary" button
+- `button:customize` - "Customize settings" button
+- `button:save_preferences` - "Save preferences" button (advanced view)
+- `button:accept_all_advanced` - "Accept All" button (advanced view)
+- `advanced_settings` - Advanced settings container
+- `advanced_header` - Advanced settings header
+- `advanced_footer` - Advanced settings footer
+- `categories_list` - Cookie categories list container
+- `category_item` - Individual category items
+
+#### Responsive Design
+
+When using Tailwind CSS, you can easily add responsive classes:
+
+```twig
+{{ component('CookieConsentBanner', {
+    'simple_banner:container:class': 'max-w-screen-xl mx-auto flex flex-col md:flex-row items-center gap-5',
+    'simple_banner:buttons_container:class': 'flex flex-col sm:flex-row gap-2.5 w-full md:w-auto'
+}) }}
+```
 
 ### Checking Consent in Templates
 

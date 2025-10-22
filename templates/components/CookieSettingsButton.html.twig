@@ -1,0 +1,10 @@
+<button 
+    {{ attributes.defaults({
+        type: 'button',
+        class: this.class ?: 'cookie-settings-button'
+    }) }}
+    onclick="document.querySelector('[data-live-name-value=CookieConsentBanner]').__component.action('reopenSettings')"
+>
+    {{ this.label }}
+</button>
+

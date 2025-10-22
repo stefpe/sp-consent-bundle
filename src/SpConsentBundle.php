@@ -9,9 +9,24 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 final class SpConsentBundle extends AbstractBundle
 {
+    public function getPath(): string
+    {
+        return \dirname(__DIR__);
+    }
+
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->import('../config/definition.php');
+    }
+
+    public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
+    {
+        // Register the bundle's template path with Twig
+        $container->extension('twig', [
+            'paths' => [
+                $this->getPath() . '/templates' => 'SpConsentBundle',
+            ],
+        ]);
     }
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
