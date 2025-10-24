@@ -165,8 +165,8 @@ This example shows how to integrate with Google Analytics 4 using **Google Conse
             
             // Apply consent on page load if user already gave consent
             document.addEventListener('DOMContentLoaded', function () {
-                {% if app.request.cookies.has('cookie_consent_preferences') %}
-                    {% set consent = app.request.cookies.get('cookie_consent_preferences')|json_decode %}
+                {% set consent = consent_preferences() %}
+                {% if consent %}
                     applyConsent(
                         {{ consent.analytics ? 'true' : 'false' }},
                         {{ consent.marketing ? 'true' : 'false' }}
