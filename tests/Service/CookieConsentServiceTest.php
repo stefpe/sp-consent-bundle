@@ -3,14 +3,18 @@
 namespace Stefpe\SpConsentBundle\Tests\Service;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Stefpe\SpConsentBundle\Service\CookieConsentService;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CookieConsentServiceTest extends TestCase
 {
     private CookieConsentService $service;
     private array $categories;
+    private TranslatorInterface $translator;
+    private LoggerInterface $logger;
 
     protected function setUp(): void
     {
@@ -32,7 +36,25 @@ class CookieConsentServiceTest extends TestCase
             ],
         ];
 
-        $this->service = new CookieConsentService($this->categories, 3600);
+        // Create mock translator
+        $this->translator = $this->createMock(TranslatorInterface::class);
+        $this->translator->method('trans')
+            ->willReturnCallback(fn($id) => $id);
+
+        // Create mock logger
+        $this->logger = $this->createMock(LoggerInterface::class);
+
+        $this->service = new CookieConsentService(
+            cookieCategories: $this->categories,
+            cookieLifetime: 3600,
+            translator: $this->translator,
+            translationDomain: 'sp_consent',
+            useTranslations: false,
+            logger: $this->logger,
+            enableLogging: true,
+            logLevel: 'info',
+            consentVersion: '1.0'
+        );
     }
 
     public function testHasConsentReturnsFalseWhenNoCookie(): void
