@@ -131,7 +131,7 @@ class CookieConsentServiceTest extends TestCase
         $this->assertInstanceOf(Cookie::class, $cookie);
         
         // Decode the cookie value
-        $cookieValue = json_decode($cookie->getValue(), true);
+        $cookieValue = json_decode((string) $cookie->getValue(), true);
         
         // Required category should be automatically set to true
         $this->assertTrue($cookieValue['necessary']);
@@ -149,7 +149,7 @@ class CookieConsentServiceTest extends TestCase
         ];
         
         $cookie = $this->service->saveConsentPreferences($preferences);
-        $cookieValue = json_decode($cookie->getValue(), true);
+        $cookieValue = json_decode((string) $cookie->getValue(), true);
         
         // Required category should still be true
         $this->assertTrue($cookieValue['necessary']);
@@ -158,7 +158,7 @@ class CookieConsentServiceTest extends TestCase
     public function testAcceptAllCookiesAcceptsAllCategories(): void
     {
         $cookie = $this->service->acceptAllCookies();
-        $cookieValue = json_decode($cookie->getValue(), true);
+        $cookieValue = json_decode((string) $cookie->getValue(), true);
         
         $this->assertTrue($cookieValue['necessary']);
         $this->assertTrue($cookieValue['analytics']);
@@ -169,7 +169,7 @@ class CookieConsentServiceTest extends TestCase
     public function testRejectOptionalCookiesKeepsOnlyRequired(): void
     {
         $cookie = $this->service->rejectOptionalCookies();
-        $cookieValue = json_decode($cookie->getValue(), true);
+        $cookieValue = json_decode((string) $cookie->getValue(), true);
         
         $this->assertTrue($cookieValue['necessary']);
         $this->assertFalse($cookieValue['analytics']);

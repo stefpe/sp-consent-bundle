@@ -3,28 +3,38 @@
     "description": "A Symfony bundle that provides a GDPR-compliant cookie and consent banner component.",
     "type": "symfony-bundle",
     "license": "MIT",
-    "keywords": ["symfony", "bundle", "gdpr", "cookie", "consent", "privacy", "cookie-banner"],
+    "keywords": [
+        "symfony",
+        "bundle",
+        "gdpr",
+        "cookie",
+        "consent",
+        "privacy",
+        "cookie-banner"
+    ],
     "homepage": "https://github.com/stefpe/sp-consent-bundle",
     "authors": [
         {
             "name": "Stefan Pöltl",
-            "email": "stefan.poeltl@example.com"
+            "email": "stefan.poeltl@yahoo.de"
         }
     ],
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.4",
         "psr/log": "^2.0|^3.0",
-        "symfony/http-foundation": "^6.4|^7.0",
-        "symfony/dependency-injection": "^6.4|^7.0",
-        "symfony/config": "^6.4|^7.0",
-        "symfony/http-kernel": "^6.4|^7.0",
-        "symfony/ux-live-component": "^2.0",
-        "symfony/twig-bundle": "^6.4|^7.0",
+        "symfony/http-foundation": "^7.4|^8.0",
+        "symfony/dependency-injection": "^7.4|^8.0",
+        "symfony/config": "^7.4|^8.0",
+        "symfony/http-kernel": "^7.4|^8.0",
+        "symfony/ux-live-component": "^2.35|^3.0",
+        "symfony/twig-bundle": "^7.4|^8.0",
         "symfony/translation-contracts": "^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0|^11.0",
-        "symfony/framework-bundle": "^6.4|^7.0"
+        "symfony/framework-bundle": "^7.4|^8.0",
+        "rector/rector": "^2.4",
+        "nyholm/symfony-bundle-test": "^3.1"
     },
     "autoload": {
         "psr-4": {
@@ -38,7 +48,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.0-dev"
+            "dev-symfony_8": "1.0-dev"
         }
     }
 }

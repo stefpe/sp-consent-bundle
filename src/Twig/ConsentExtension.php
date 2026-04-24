@@ -18,9 +18,9 @@ class ConsentExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('consent_preferences', [$this, 'getConsentPreferences']),
-            new TwigFunction('has_consent', [$this, 'hasConsent']),
-            new TwigFunction('has_consent_for', [$this, 'hasConsentFor']),
+            new TwigFunction('consent_preferences', $this->getConsentPreferences(...)),
+            new TwigFunction('has_consent', $this->hasConsent(...)),
+            new TwigFunction('has_consent_for', $this->hasConsentFor(...)),
         ];
     }
 
